@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 47 28% 94%;
+    --foreground: 19 16% 31%;
+    --card: 47 28% 94%;
+    --card-foreground: 19 16% 31%;
+    --popover: 47 28% 94%;
+    --popover-foreground: 19 16% 31%;
+    --primary: 18 43% 62%;
+    --primary-foreground: 47 28% 94%;
+    --secondary: 120 7% 58%;
+    --secondary-foreground: 19 16% 31%;
+    --muted: 19 16% 90%;
+    --muted-foreground: 19 16% 40%;
+    --accent: 18 43% 62%;
+    --accent-foreground: 19 16% 31%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 19 16% 80%;
+    --input: 19 16% 80%;
+    --ring: 18 43% 62%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 19 16% 15%;
+    --foreground: 47 28% 94%;
+    --card: 19 16% 15%;
+    --card-foreground: 47 28% 94%;
+    --popover: 19 16% 15%;
+    --popover-foreground: 47 28% 94%;
+    --primary: 18 43% 62%;
+    --primary-foreground: 19 16% 15%;
+    --secondary: 120 7% 30%;
+    --secondary-foreground: 47 28% 94%;
+    --muted: 19 16% 25%;
+    --muted-foreground: 19 16% 70%;
+    --accent: 18 43% 62%;
+    --accent-foreground: 47 28% 94%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 47 28% 94%;
+    --border: 19 16% 30%;
+    --input: 19 16% 30%;
+    --ring: 18 43% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold text-rustic-charcoal;
+  }
+}
