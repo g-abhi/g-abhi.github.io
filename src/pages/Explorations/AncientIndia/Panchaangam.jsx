@@ -821,10 +821,22 @@ function CameraFollower({ target, targetsRef }) {
 
         if (target === 'EARTH' && targetsRef.current.earth) {
             targetsRef.current.earth.getWorldPosition(targetPos);
-            minD = 1.5; maxD = 15;
+            minD = 1.5; maxD = 450;
         } else if (target === 'MOON' && targetsRef.current.moon) {
             targetsRef.current.moon.getWorldPosition(targetPos);
-            minD = 0.5; maxD = 8;
+            minD = 0.5; maxD = 450;
+        } else if (target === 'RAHU' && targetsRef.current.rahu) {
+            targetsRef.current.rahu.getWorldPosition(targetPos);
+            minD = 0.3; maxD = 450;
+        } else if (target === 'KETU' && targetsRef.current.ketu) {
+            targetsRef.current.ketu.getWorldPosition(targetPos);
+            minD = 0.3; maxD = 450;
+        } else if (target?.startsWith('PLANET_')) {
+            const ref = targetsRef.current[target.toLowerCase()];
+            if (ref) {
+                ref.getWorldPosition(targetPos);
+                minD = 2; maxD = 450;
+            }
         } else {
             // SUN
             minD = 5; maxD = 450; // Use larger max distance to view the expanded Chakras (R=150)
@@ -838,7 +850,7 @@ function CameraFollower({ target, targetsRef }) {
     return null;
 }
 
-function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, targetsRef }) {
+function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, targetsRef, onFocus, focusTarget }) {
     // ... rest of the component
     const sunMesh = useRef();
     const earthOrbit = useRef();
@@ -879,6 +891,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
     // Load textures
     const earthMap = useTexture('/assets/earth_vibrant.png');
     const sunMap = useTexture('/assets/sun_texture.png');
+    const moonMap = useTexture('/assets/moon_texture.png');
     const mercuryMap = useTexture('/assets/mercury.png');
     const venusMap = useTexture('/assets/venus.png');
     const marsMap = useTexture('/assets/mars.png');
@@ -1286,7 +1299,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
     return (
         <group>
             {/* Sun */}
-            <mesh ref={sunMesh}>
+            <mesh ref={sunMesh} onClick={(e) => { e.stopPropagation(); onFocus?.('SUN'); }}>
                 <sphereGeometry args={[1.5, 64, 64]} />
                 <meshStandardMaterial
                     map={sunMap}
@@ -1296,7 +1309,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
                     toneMapped={true}
                 />
                 <Html position={[0, 2.5, 0]} center distanceFactor={45}>
-                    <div className="text-[14px] text-white bg-black/50 px-3 py-1 rounded-full whitespace-nowrap backdrop-blur-sm border border-white/20 tracking-widest uppercase font-mono font-bold shadow-[0_0_15px_rgba(255,140,0,0.2)]">{ui.sun}</div>
+                    <div onClick={() => onFocus?.('SUN')} className={`text-[14px] px-3 py-1 rounded-full whitespace-nowrap backdrop-blur-sm border tracking-widest uppercase font-mono font-bold cursor-pointer transition-all ${focusTarget === 'SUN' ? 'text-yellow-100 bg-yellow-500/30 border-yellow-400/60 shadow-[0_0_15px_rgba(234,179,8,0.5)]' : 'text-white bg-black/50 border-white/20 hover:bg-white/20 shadow-[0_0_15px_rgba(255,140,0,0.2)]'}`}>{ui.sun}</div>
                 </Html>
             </mesh>
             <pointLight intensity={0.8} distance={0} decay={0} color="#fffaed" />
@@ -1378,6 +1391,9 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
                     lang={location.lang}
                     isActive={!paused}
                     speed={speed}
+                    onFocus={onFocus}
+                    targetsRef={targetsRef}
+                    focusTarget={focusTarget}
                 />
             ))}
 
@@ -1386,7 +1402,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
                 <group> {/* Earth Unit Container moved by distance */}
                     {/* Earth Axis tilt (23.4 degrees) */}
                     <group rotation={[0.409, 0, 0]}>
-                        <mesh ref={(el) => { earthMesh.current = el; if (targetsRef) targetsRef.current.earth = el; }}>
+                        <mesh ref={(el) => { earthMesh.current = el; if (targetsRef) targetsRef.current.earth = el; }} onClick={(e) => { e.stopPropagation(); onFocus?.('EARTH'); }}>
                             <sphereGeometry args={[0.7, 64, 64]} />
                             <meshPhysicalMaterial
                                 map={earthMap}
@@ -1396,30 +1412,33 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
                                 clearcoatRoughness={0.1}
                             />
                             <Html position={[0, 1.4, 0]} center distanceFactor={45}>
-                                <div className="text-[14px] text-white bg-black/50 px-3 py-1 rounded-full whitespace-nowrap backdrop-blur-sm border border-white/20 tracking-widest uppercase font-mono font-bold">{ui.earth}</div>
+                                <div onClick={() => onFocus?.('EARTH')} className={`text-[14px] px-3 py-1 rounded-full whitespace-nowrap backdrop-blur-sm border tracking-widest uppercase font-mono font-bold cursor-pointer transition-all ${focusTarget === 'EARTH' ? 'text-blue-100 bg-blue-500/30 border-blue-400/60 shadow-[0_0_15px_rgba(96,165,250,0.5)]' : 'text-white bg-black/50 border-white/20 hover:bg-white/20'}`}>{ui.earth}</div>
                             </Html>
                         </mesh>
                     </group>
 
                     {/* Rahu / Ketu (Geocentric - orbiting Earth) */}
                     <group ref={nodeGroupRef}>
-                        <LunarNodes nodePos={nodePos} lang={location.lang} />
+                        <LunarNodes nodePos={nodePos} lang={location.lang} onFocus={onFocus} focusTarget={focusTarget} targetsRef={targetsRef} />
                     </group>
 
                     <group ref={moonOrbit}>
-                        <mesh ref={(el) => { moonMesh.current = el; if (targetsRef) targetsRef.current.moon = el; }} position={[1.5, 0, 0]}>
+                        <mesh ref={(el) => { moonMesh.current = el; if (targetsRef) targetsRef.current.moon = el; }} position={[1.5, 0, 0]} onClick={(e) => { e.stopPropagation(); onFocus?.('MOON'); }}>
                             <sphereGeometry args={[0.35, 32, 32]} />
                             <meshStandardMaterial
-                                color={ui.eclipse?.type === 'LUNAR' ? "#ef4444" : "#dddddd"} // Blood moon red or standard gray
-                                roughness={0.8}
-                                metalness={0.0}
+                                map={moonMap}
+                                color={ui.eclipse?.type === 'LUNAR' ? "#ef4444" : "#ffffff"}
+                                roughness={0.9}
+                                metalness={0.1}
                                 emissive={ui.eclipse?.type === 'LUNAR' ? "#991b1b" : "#000000"}
                                 emissiveIntensity={ui.eclipse?.type === 'LUNAR' ? 0.5 : 0}
                             />
                             <Html position={[0, 0.7, 0]} center distanceFactor={45}>
-                                <div className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap backdrop-blur-sm border tracking-widest uppercase font-mono font-bold ${ui.eclipse?.type === 'LUNAR'
-                                    ? "text-red-100 bg-red-900/60 border-red-500/50 shadow-[0_0_10px_rgba(220,38,38,0.5)]"
-                                    : "text-white bg-black/50 border-white/20"
+                                <div onClick={() => onFocus?.('MOON')} className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap backdrop-blur-sm border tracking-widest uppercase font-mono font-bold cursor-pointer transition-all ${focusTarget === 'MOON'
+                                    ? 'text-white bg-white/30 border-white/60 shadow-[0_0_10px_rgba(255,255,255,0.4)]'
+                                    : ui.eclipse?.type === 'LUNAR'
+                                        ? 'text-red-100 bg-red-900/60 border-red-500/50 shadow-[0_0_10px_rgba(220,38,38,0.5)]'
+                                        : 'text-white bg-black/50 border-white/20 hover:bg-white/20'
                                     }`}>{ui.moon}</div>
                             </Html>
                         </mesh>
@@ -1517,30 +1536,34 @@ const PLANET_DATA = [
     { id: 6, name: { en: "Saturn", te: "శని" }, color: "#fcd34d", radius: 7.0, au: 9.537, scale: 0.35, rotationPeriod: 0.444, ring: true } // 9.537 AU → ~92.6 units
 ];
 
-function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed }) {
+function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed, onFocus, targetsRef, focusTarget }) {
     const meshRef = useRef();
-    const { au, color, radius, ring, scale = 1, name, rotationPeriod } = data;
+    const { au, color, radius, ring, scale = 1, name, rotationPeriod, id } = data;
     const distance = auToVisual(au);
+    const targetKey = `planet_${id}`;
 
-    // Smooth update of position
+    // Register mesh ref for camera tracking
     useFrame((state, delta) => {
-        if (meshRef.current && ephemeris) {
-            const angle = THREE.MathUtils.degToRad(ephemeris.long);
-            const x = distance * Math.cos(angle);
-            const z = -distance * Math.sin(angle);
-            meshRef.current.position.set(x, 0, z);
+        if (meshRef.current) {
+            if (targetsRef?.current) targetsRef.current[targetKey] = meshRef.current;
+            if (ephemeris) {
+                const angle = THREE.MathUtils.degToRad(ephemeris.long);
+                const x = distance * Math.cos(angle);
+                const z = -distance * Math.sin(angle);
+                meshRef.current.position.set(x, 0, z);
 
-            // Axial rotation (Scientific duration relative to Earth=1.0)
-            if (isActive && rotationPeriod) {
-                // delta * speed = total simulated days passed in this frame
-                // Days / RotationPeriod = fraction of rotation completed
-                const rotationIncrement = (delta * speed / rotationPeriod) * (Math.PI * 2);
-                meshRef.current.rotation.y += rotationIncrement;
+                // Axial rotation (Scientific duration relative to Earth=1.0)
+                if (isActive && rotationPeriod) {
+                    const rotationIncrement = (delta * speed / rotationPeriod) * (Math.PI * 2);
+                    meshRef.current.rotation.y += rotationIncrement;
+                }
             }
         }
     });
 
     const displayRadius = radius * 0.5 * scale;
+    const handleClick = (e) => { if (e?.stopPropagation) e.stopPropagation(); onFocus?.(`PLANET_${id}`); };
+    const isActive3D = focusTarget === `PLANET_${id}`;
 
     return (
         <group>
@@ -1551,15 +1574,15 @@ function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed }) {
             </mesh>
 
             {/* Planet Mesh */}
-            <mesh ref={meshRef}>
+            <mesh ref={meshRef} onClick={handleClick}>
                 <sphereGeometry args={[displayRadius, 32, 32]} />
                 <meshStandardMaterial
                     map={map}
                     color={map ? "#ffffff" : color}
-                    roughness={1.0} // Fully matte
-                    metalness={0.0} // No metallic reflection
+                    roughness={1.0}
+                    metalness={0.0}
                     emissive={color}
-                    emissiveIntensity={0.05} // Tiny glow to prevent absolute black holes
+                    emissiveIntensity={0.05}
                 />
 
                 {ring && (
@@ -1570,14 +1593,14 @@ function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed }) {
                 )}
 
                 <Html position={[0, displayRadius + 0.5, 0]} center distanceFactor={60} zIndexRange={[100, 0]}>
-                    <div className="text-[10px] text-white/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-md border border-white/20 tracking-widest uppercase font-mono pointer-events-none whitespace-nowrap font-bold">{name[lang] || name.en}</div>
+                    <div onClick={handleClick} className={`text-[10px] px-2 py-0.5 rounded-full backdrop-blur-md border tracking-widest uppercase font-mono whitespace-nowrap font-bold cursor-pointer transition-all ${isActive3D ? 'text-white bg-white/25 border-white/60 shadow-[0_0_12px_rgba(255,255,255,0.4)]' : 'text-white/90 bg-black/60 border-white/20 hover:bg-white/20'}`}>{name[lang] || name.en}</div>
                 </Html>
             </mesh>
         </group>
     );
 }
 
-function LunarNodes({ nodePos, lang }) {
+function LunarNodes({ nodePos, lang, onFocus, focusTarget, targetsRef }) {
     const rahuLabel = lang === 'te' ? "రాహు" : "Rahu";
     const ketuLabel = lang === 'te' ? "కేతు" : "Ketu";
 
@@ -1586,24 +1609,24 @@ function LunarNodes({ nodePos, lang }) {
             {/* Rahu */}
             <group rotation={[0, THREE.MathUtils.degToRad(nodePos.rahu), 0]}>
                 <group position={[2.0, 0, 0]}>
-                    <mesh rotation={[Math.PI / 2, 0, 0]}>
+                    <mesh ref={(el) => { if (targetsRef?.current) targetsRef.current.rahu = el; }} rotation={[Math.PI / 2, 0, 0]} onClick={(e) => { e.stopPropagation(); onFocus?.('RAHU'); }}>
                         <torusGeometry args={[0.15, 0.05, 12, 24]} />
                         <meshStandardMaterial color="#4ade80" emissive="#4ade80" emissiveIntensity={2} />
                     </mesh>
                     <Html position={[0, 0.4, 0]} center distanceFactor={45}>
-                        <div className="text-[9px] text-emerald-400 font-mono tracking-widest uppercase font-bold bg-black/70 px-1 rounded">{rahuLabel}</div>
+                        <div onClick={() => onFocus?.('RAHU')} className={`text-[9px] font-mono tracking-widest uppercase font-bold px-1 rounded cursor-pointer transition-all ${focusTarget === 'RAHU' ? 'text-emerald-200 bg-emerald-500/30 border border-emerald-400/60 shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'text-emerald-400 bg-black/70 hover:bg-emerald-900/40'}`}>{rahuLabel}</div>
                     </Html>
                 </group>
             </group>
             {/* Ketu */}
             <group rotation={[0, THREE.MathUtils.degToRad(nodePos.ketu), 0]}>
                 <group position={[2.0, 0, 0]}>
-                    <mesh rotation={[Math.PI / 2, 0, 0]}>
+                    <mesh ref={(el) => { if (targetsRef?.current) targetsRef.current.ketu = el; }} rotation={[Math.PI / 2, 0, 0]} onClick={(e) => { e.stopPropagation(); onFocus?.('KETU'); }}>
                         <torusGeometry args={[0.15, 0.05, 12, 24]} />
                         <meshStandardMaterial color="#f87171" emissive="#f87171" emissiveIntensity={2} />
                     </mesh>
                     <Html position={[0, 0.4, 0]} center distanceFactor={45}>
-                        <div className="text-[9px] text-rose-400 font-mono tracking-widest uppercase font-bold bg-black/70 px-1 rounded">{ketuLabel}</div>
+                        <div onClick={() => onFocus?.('KETU')} className={`text-[9px] font-mono tracking-widest uppercase font-bold px-1 rounded cursor-pointer transition-all ${focusTarget === 'KETU' ? 'text-rose-200 bg-rose-500/30 border border-rose-400/60 shadow-[0_0_10px_rgba(248,113,113,0.5)]' : 'text-rose-400 bg-black/70 hover:bg-rose-900/40'}`}>{ketuLabel}</div>
                     </Html>
                 </group>
             </group>
@@ -1711,7 +1734,81 @@ export default function Panchaangam() {
     const [speed, setSpeed] = useState(1 / 86400); // Default to Real Time
     const [ready, setReady] = useState(false);
     const [isPanelVisible, setIsPanelVisible] = useState(true);
-    const [cameraTarget, setCameraTarget] = useState('SUN');
+    // Focus Helpers
+    const getTargetFromSlug = (slug) => {
+        if (!slug) return 'SUN';
+        const s = slug.toLowerCase();
+        if (s === 'earth') return 'EARTH';
+        if (s === 'moon') return 'MOON';
+        if (s === 'sun') return 'SUN';
+        if (s === 'rahu') return 'RAHU';
+        if (s === 'ketu') return 'KETU';
+
+        // Planet mapping
+        const pMap = {
+            'mercury': 'PLANET_2',
+            'venus': 'PLANET_3',
+            'mars': 'PLANET_4',
+            'jupiter': 'PLANET_5',
+            'saturn': 'PLANET_6'
+        };
+        return pMap[s] || 'SUN';
+    };
+
+    const getSlugFromTarget = (target) => {
+        if (!target || target === 'SUN') return '';
+        if (target === 'EARTH') return 'earth';
+        if (target === 'MOON') return 'moon';
+        if (target === 'RAHU') return 'rahu';
+        if (target === 'KETU') return 'ketu';
+
+        if (target.startsWith('PLANET_')) {
+            const id = parseInt(target.split('_')[1]);
+            const p = PLANET_DATA.find(p => p.id === id);
+            return p ? p.name.en.toLowerCase() : '';
+        }
+        return '';
+    };
+
+    // Initialize from URL
+    const getInitialFocus = () => {
+        try {
+            const hash = window.location.hash;
+            const qIdx = hash.indexOf('?');
+            if (qIdx !== -1) {
+                const params = new URLSearchParams(hash.slice(qIdx));
+                return getTargetFromSlug(params.get('focus'));
+            }
+        } catch (_) { }
+        return 'SUN';
+    };
+
+    const [cameraTarget, setCameraTarget] = useState(getInitialFocus);
+
+    // 1. Sync state to URL (UI -> URL)
+    useEffect(() => {
+        const hash = window.location.hash;
+        const qIdx = hash.indexOf('?');
+        const basePath = qIdx !== -1 ? hash.slice(0, qIdx) : hash;
+        const slug = getSlugFromTarget(cameraTarget);
+        const newParam = slug ? `?focus=${slug}` : '';
+
+        // Only replace if currently different to avoid loops
+        const currentParams = new URLSearchParams(qIdx !== -1 ? hash.slice(qIdx) : '');
+        if (currentParams.get('focus') !== slug) {
+            window.history.replaceState(null, '', basePath + newParam);
+        }
+    }, [cameraTarget]);
+
+    // 2. Listen for URL changes (URL -> UI)
+    useEffect(() => {
+        const handleHashChange = () => {
+            const newTarget = getInitialFocus();
+            setCameraTarget(newTarget);
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
     const [location, setLocation] = useState({
         name: 'Hyderabad, Telangana, India',
         lat: 17.3850,
@@ -2227,9 +2324,9 @@ export default function Panchaangam() {
                     <div className="flex-1">
                         <Canvas camera={{ position: [0, 30, 45], fov: 45, far: 10000 }} dpr={[1, 2]}>
                             <Stars radius={200} depth={60} count={10000} factor={6} saturation={0} fade speed={0.2} />
-                            <SolarSystem speed={speed} paused={paused} anchorJD={anchorJD} location={{ ...location, lang }} onUpdate={setData} sweReady={ready} targetsRef={celestialRefs} />
+                            <SolarSystem speed={speed} paused={paused} anchorJD={anchorJD} location={{ ...location, lang }} onUpdate={setData} sweReady={ready} targetsRef={celestialRefs} onFocus={setCameraTarget} focusTarget={cameraTarget} />
                             <CameraFollower target={cameraTarget} targetsRef={celestialRefs} />
-                            <OrbitControls enableDamping dampingFactor={0.05} />
+                            <OrbitControls makeDefault enableDamping dampingFactor={0.05} />
                         </Canvas>
                     </div>
 
