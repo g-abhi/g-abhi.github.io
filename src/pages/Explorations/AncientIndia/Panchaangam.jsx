@@ -1215,8 +1215,8 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
             // Earth is at longitude sun+180 relative to Sun
             earthOrbit.current.rotation.y = THREE.MathUtils.degToRad(sun + 180);
 
-            // Dynamic distance (Ellipticity) - Base radius 10 units scaled by AU
-            const r = 10 * sunPos[2];
+            // Dynamic distance (Ellipticity) - sqrt-compressed AU scaling
+            const r = auToVisual(sunPos[2]);
             // The Earth Unit is the first child group
             const earthUnit = earthOrbit.current.children[0];
             if (earthUnit) earthUnit.position.set(r, 0, 0);
@@ -1236,7 +1236,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
 
         // Dynamic distance for Moon
         if (moonOrbit.current) {
-            const mR = 2.2 * (moonPos[2] / 0.002569);
+            const mR = 1.5 * (moonPos[2] / 0.002569);
             const moonMeshGroup = moonOrbit.current.children[0];
             if (moonMeshGroup) moonMeshGroup.position.set(mR, 0, 0);
         }
@@ -1278,11 +1278,10 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
     const sunAngle = THREE.MathUtils.degToRad(activeRasi * 30 + 15); // Center of Rasi
     const moonAngle = THREE.MathUtils.degToRad(activeNak * (360 / 27) + (360 / 27) / 2); // Center of Nakshatra
 
-    // Radii Settings (Chakras outside Saturn=95)
-    // 140/150 range
-    const R_WHEEL_RASI = 140;
-    const R_WHEEL_NAK = 130;
-    const R_BEAM_LEN = 150;
+    // Derived from AU_SCALE — all positions scale together
+    const R_WHEEL_RASI = R_VIS_RASI;
+    const R_WHEEL_NAK = R_VIS_NAK;
+    const R_BEAM_LEN = R_VIS_CONSTELLATION;
 
     return (
         <group>
@@ -1408,7 +1407,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
                     </group>
 
                     <group ref={moonOrbit}>
-                        <mesh ref={(el) => { moonMesh.current = el; if (targetsRef) targetsRef.current.moon = el; }} position={[2.2, 0, 0]}>
+                        <mesh ref={(el) => { moonMesh.current = el; if (targetsRef) targetsRef.current.moon = el; }} position={[1.5, 0, 0]}>
                             <sphereGeometry args={[0.35, 32, 32]} />
                             <meshStandardMaterial
                                 color={ui.eclipse?.type === 'LUNAR' ? "#ef4444" : "#dddddd"} // Blood moon red or standard gray
@@ -1428,7 +1427,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
 
                     {/* Moon Orbit Trajectory (Relative to Earth) */}
                     <mesh rotation={[Math.PI / 2, 0, 0]}>
-                        <ringGeometry args={[2.15, 2.25, 64]} />
+                        <ringGeometry args={[1.45, 1.55, 64]} />
                         <meshStandardMaterial
                             color="#ffffff"
                             emissive="#ffffff"
@@ -1457,12 +1456,12 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
 
             {/* Earth Orbit Trajectory (Avg radius) */}
             <mesh rotation={[-Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[9.9, 10.1, 128]} />
+                <ringGeometry args={[auToVisual(1.0) - 0.15, auToVisual(1.0) + 0.15, 128]} />
                 <meshStandardMaterial
-                    color="#FFD700"
-                    emissive="#FFD700"
-                    emissiveIntensity={0.8}
-                    opacity={0.6}
+                    color="#60a5fa"
+                    emissive="#60a5fa"
+                    emissiveIntensity={0.6}
+                    opacity={0.45}
                     transparent
                     side={THREE.DoubleSide}
                 />
@@ -1482,7 +1481,7 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
 
                 return (
                     <group key={`sky-nak-${i}`} rotation={[0, angle, 0]}>
-                        <group position={[150, 0, 0]}>
+                        <group position={[R_VIS_CONSTELLATION, 0, 0]}>
                             <Constellation
                                 points={points}
                                 color="#94a3b8" // Neutral Silver
@@ -1500,17 +1499,28 @@ function SolarSystem({ speed, paused, anchorJD, location, onUpdate, sweReady, ta
 
 // --- NAVAGRAHA COMPONENTS ---
 
+// Master visualization scale — changing this single value rescales the entire solar system
+const AU_SCALE = 30;
+const auToVisual = (au) => AU_SCALE * Math.sqrt(au);
+
+// Derived layout constants (all relative to Saturn's orbit)
+const R_SATURN_ORBIT = auToVisual(9.537);   // ~92.6 units
+const R_VIS_NAK = R_SATURN_ORBIT * 1.4;     // Nakshatra wheel — ~130 units
+const R_VIS_RASI = R_SATURN_ORBIT * 1.5;    // Rasi wheel — ~139 units
+const R_VIS_CONSTELLATION = R_SATURN_ORBIT * 1.62; // Beams & Constellations — ~150 units
+
 const PLANET_DATA = [
-    { id: 2, name: { en: "Mercury", te: "బుధుడు" }, color: "#9ca3af", radius: 1.2, distance: 3.9, rotationPeriod: 58.646 },      // Sidereal Rotation in Days
-    { id: 3, name: { en: "Venus", te: "శుక్రుడు" }, color: "#fff7ed", radius: 2.0, distance: 7.2, rotationPeriod: -243.018 },    // Retrograde
-    { id: 4, name: { en: "Mars", te: "కుజుడు" }, color: "#fb7185", radius: 1.6, distance: 15.2, rotationPeriod: 1.0259 },       // 24.6h
-    { id: 5, name: { en: "Jupiter", te: "బృహస్పతి" }, color: "#fbbf24", radius: 8.0, distance: 52, scale: 0.35, rotationPeriod: 0.4135 }, // 9.9h
-    { id: 6, name: { en: "Saturn", te: "శని" }, color: "#fcd34d", radius: 7.0, distance: 95, scale: 0.35, rotationPeriod: 0.444, ring: true } // 10.7h
+    { id: 2, name: { en: "Mercury", te: "బుధుడు" }, color: "#9ca3af", radius: 1.2, au: 0.387, rotationPeriod: 58.646 },      // 0.387 AU → ~18.7 units
+    { id: 3, name: { en: "Venus", te: "శుక్రుడు" }, color: "#fff7ed", radius: 2.0, au: 0.723, rotationPeriod: -243.018 },    // 0.723 AU → ~25.5 units
+    { id: 4, name: { en: "Mars", te: "కుజుడు" }, color: "#fb7185", radius: 1.6, au: 1.524, rotationPeriod: 1.0259 },       // 1.524 AU → ~37.0 units
+    { id: 5, name: { en: "Jupiter", te: "బృహస్పతి" }, color: "#fbbf24", radius: 8.0, au: 5.203, scale: 0.35, rotationPeriod: 0.4135 }, // 5.203 AU → ~68.4 units
+    { id: 6, name: { en: "Saturn", te: "శని" }, color: "#fcd34d", radius: 7.0, au: 9.537, scale: 0.35, rotationPeriod: 0.444, ring: true } // 9.537 AU → ~92.6 units
 ];
 
 function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed }) {
     const meshRef = useRef();
-    const { distance, color, radius, ring, scale = 1, name, rotationPeriod } = data;
+    const { au, color, radius, ring, scale = 1, name, rotationPeriod } = data;
+    const distance = auToVisual(au);
 
     // Smooth update of position
     useFrame((state, delta) => {
@@ -1536,8 +1546,8 @@ function PlanetOrbit({ data, ephemeris, lang, map, isActive, speed }) {
         <group>
             {/* Orbit Path */}
             <mesh rotation={[Math.PI / 2, 0, 0]}>
-                <ringGeometry args={[distance - 0.2, distance + 0.2, 128]} />
-                <meshBasicMaterial color={color} opacity={0.3} transparent side={THREE.DoubleSide} />
+                <ringGeometry args={[distance - 0.15, distance + 0.15, 128]} />
+                <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} opacity={0.35} transparent side={THREE.DoubleSide} />
             </mesh>
 
             {/* Planet Mesh */}
@@ -1575,7 +1585,7 @@ function LunarNodes({ nodePos, lang }) {
         <group>
             {/* Rahu */}
             <group rotation={[0, THREE.MathUtils.degToRad(nodePos.rahu), 0]}>
-                <group position={[2.8, 0, 0]}>
+                <group position={[2.0, 0, 0]}>
                     <mesh rotation={[Math.PI / 2, 0, 0]}>
                         <torusGeometry args={[0.15, 0.05, 12, 24]} />
                         <meshStandardMaterial color="#4ade80" emissive="#4ade80" emissiveIntensity={2} />
@@ -1587,7 +1597,7 @@ function LunarNodes({ nodePos, lang }) {
             </group>
             {/* Ketu */}
             <group rotation={[0, THREE.MathUtils.degToRad(nodePos.ketu), 0]}>
-                <group position={[2.8, 0, 0]}>
+                <group position={[2.0, 0, 0]}>
                     <mesh rotation={[Math.PI / 2, 0, 0]}>
                         <torusGeometry args={[0.15, 0.05, 12, 24]} />
                         <meshStandardMaterial color="#f87171" emissive="#f87171" emissiveIntensity={2} />
