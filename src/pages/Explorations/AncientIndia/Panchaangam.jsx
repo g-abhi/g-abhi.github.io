@@ -774,12 +774,12 @@ function ZodiacWheel({ radius, segments, labels, dataKeys, color, activeIndex, l
                             <div className="relative flex flex-col items-center group pointer-events-auto">
                                 {/* The Label Pill */}
                                 <div
-                                    className={`transition-all duration-500 cursor-help px-3 py-1 rounded-full whitespace-nowrap font-bold tracking-tighter shadow-lg border backdrop-blur-md font-mono uppercase ${isSelected ? 'opacity-100 dark:shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'opacity-60 group-hover:opacity-100'}`}
+                                    className={`transition-all duration-500 cursor-help px-3 py-1 rounded-full whitespace-nowrap font-bold tracking-tighter shadow-lg border backdrop-blur-md font-mono uppercase ${isSelected ? 'text-white bg-white/25 border-white/60 shadow-[0_0_12px_rgba(255,255,255,0.4)] opacity-100' : 'opacity-60 group-hover:opacity-100'}`}
                                     style={{
                                         transform: `scale(${isSelected ? 1.4 : 1.1})`,
-                                        backgroundColor: isSelected ? color : 'rgba(0,0,0,0.6)',
-                                        color: isSelected ? 'white' : color,
-                                        borderColor: isSelected ? 'white' : color,
+                                        backgroundColor: isSelected ? undefined : 'rgba(0,0,0,0.6)',
+                                        color: isSelected ? undefined : color,
+                                        borderColor: isSelected ? undefined : color,
                                         fontSize: `${18 * labelScale}px`
                                     }}
                                 >
@@ -787,7 +787,7 @@ function ZodiacWheel({ radius, segments, labels, dataKeys, color, activeIndex, l
                                 </div>
 
                                 {isSelected && (
-                                    <div className="text-[8px] text-white mt-1 font-mono animate-pulse opacity-90 bg-black/60 px-2 rounded tracking-widest">
+                                    <div className="text-[8px] text-white mt-1 font-mono animate-pulse opacity-90 bg-black/60 px-2 rounded tracking-widest shadow-[0_0_10px_rgba(255,255,255,0.3)] border border-white/20">
                                         ACTIVE
                                     </div>
                                 )}
