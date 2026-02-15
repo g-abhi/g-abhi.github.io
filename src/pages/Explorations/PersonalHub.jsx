@@ -11,7 +11,7 @@ const ExplorationsMenu = () => (
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold text-slate-900">Ancient India</CardTitle>
                     <CardDescription className="text-lg text-slate-600">
-                        Exploring wisdom, astronomy, and history.
+                        Learning about the Vedas.
                     </CardDescription>
                 </CardHeader>
             </Card>

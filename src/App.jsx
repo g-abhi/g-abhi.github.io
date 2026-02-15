@@ -14,7 +14,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="professional" element={<ProfessionalHub />} />
 
-          <Route path="explorations/*" element={<ExplorationsHub />} />
+          <Route path="studio/*" element={<ExplorationsHub />} />
         </Route>
       </Routes>
     </HashRouter>

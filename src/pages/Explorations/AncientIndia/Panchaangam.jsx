@@ -596,8 +596,8 @@ function Constellation({ points, color, active, scale = 1, yogataras = [] }) {
             {/* Stars */}
             {points.map((p, i) => {
                 const isYogatara = yogataras.includes(i);
-                // Highlight if it's a Yogatara and active, OR if it's the only star and active
-                const isHighlight = active && (isYogatara || (points.length === 1));
+                // Highlight if it's a Yogatara (always visible), OR if it's the only star
+                const isHighlight = isYogatara || (points.length === 1);
 
                 return (
                     <group key={i} position={[0, p[1] * scale - (scale / 2), (p[0] - 0.5) * scale]}>
@@ -606,19 +606,13 @@ function Constellation({ points, color, active, scale = 1, yogataras = [] }) {
                             <meshStandardMaterial
                                 color={isHighlight ? "#ffffff" : "#e2e8f0"} // Neutral Stellar White
                                 emissive={isHighlight ? "#ffffff" : "#e2e8f0"}
-                                emissiveIntensity={isHighlight ? 15 : (active ? 2 : 0.5)}
+                                emissiveIntensity={isHighlight ? 50 : (active ? 2 : 0.5)}
                                 transparent
-                                opacity={active ? 1 : 0.4}
+                                opacity={(active || isHighlight) ? 1 : 0.4}
                             />
                         </mesh>
                         {isHighlight && (
-                            <>
-                                <pointLight ref={starRef} distance={8} intensity={3} color="white" />
-                                <mesh>
-                                    <ringGeometry args={[0.4, 0.5, 32]} />
-                                    <meshBasicMaterial color="white" transparent opacity={0.3} side={THREE.DoubleSide} />
-                                </mesh>
-                            </>
+                            <pointLight ref={starRef} distance={8} intensity={6} color="white" />
                         )}
                     </group>
                 );
@@ -2077,6 +2071,14 @@ export default function Panchaangam() {
                                                             }
                                                         }}
                                                         className="bg-neutral-900 text-white border border-white/5 shadow-2xl rounded-2xl"
+                                                        onMonthChange={(date) => {
+                                                            const newJD = toJD(date.getTime());
+                                                            setAnchorJD(newJD);
+                                                        }}
+                                                        onYearChange={(date) => {
+                                                            const newJD = toJD(date.getTime());
+                                                            setAnchorJD(newJD);
+                                                        }}
                                                     />
                                                 </PopoverContent>
                                             </Popover>

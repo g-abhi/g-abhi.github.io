@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, GraduationCap } from 'lucide-react';
-import InteractiveBackground from '../components/UI/InteractiveBackground';
 import abhinavPhoto from '../assets/abhinav.png';
 
 const WavingHand = () => (
@@ -72,8 +71,7 @@ const Home = () => {
     const [showSecondLine, setShowSecondLine] = useState(false);
 
     return (
-        <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-center overflow-hidden font-serif">
-            <InteractiveBackground />
+        <div className="relative w-full flex-grow flex flex-col items-center justify-center overflow-hidden font-serif">
 
             <div className="max-w-4xl mx-auto px-4 relative z-10 text-center text-slate-950 pb-20">
                 <motion.header
