@@ -2,6 +2,7 @@ import React from 'react';
 import Navbar from './Navbar';
 import { Outlet, useLocation } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import SocialIcons from '../UI/SocialIcons';
 
 const Layout = () => {
     const location = useLocation();
@@ -15,8 +16,11 @@ const Layout = () => {
             </main>
             {!isPanchaangam && (
                 <footer className="py-12 mt-auto border-t border-slate-200/50 text-slate-500/80">
-                    <div className="max-w-7xl mx-auto px-4 text-center text-sm font-serif">
-                        <p>© {new Date().getFullYear()} • g-abhi</p>
+                    <div className="max-w-7xl mx-auto px-4 text-center space-y-6">
+                        <SocialIcons />
+                        <div className="text-sm font-serif">
+                            <p>© {new Date().getFullYear()} • g-abhi</p>
+                        </div>
                     </div>
                 </footer>
             )}

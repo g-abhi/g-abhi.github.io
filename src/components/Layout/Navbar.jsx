@@ -63,13 +63,20 @@ const Navbar = () => {
         const handleScroll = () => {
             const sections = ['experience', 'research', 'projects', 'teaching'];
 
+            // Check if user is at the bottom of the page
+            const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100;
+
+            if (isAtBottom) {
+                setActiveSection('teaching');
+                return;
+            }
+
             // Find the section that is most visible or closest to the top
             for (const sectionId of sections) {
                 const element = document.getElementById(sectionId);
                 if (element) {
                     const rect = element.getBoundingClientRect();
                     // Check if the top of the section is near the viewport top (adjusted for navbar height)
-                    // or if the bottom is still in view
                     if (rect.top <= 150 && rect.bottom >= 150) {
                         setActiveSection(sectionId);
                         break;

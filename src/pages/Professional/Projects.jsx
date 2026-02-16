@@ -1,8 +1,9 @@
 import React from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import LinkBadge from "@/components/UI/LinkBadge";
 
-const ProjectCard = ({ title, tech, description }) => (
+const ProjectCard = ({ title, tech, description, links }) => (
     <Card className="border border-slate-200 bg-white hover:shadow-lg transition-all duration-300">
         <CardHeader>
             <CardTitle className="text-xl font-bold text-slate-900">{title}</CardTitle>
@@ -15,9 +16,16 @@ const ProjectCard = ({ title, tech, description }) => (
             </div>
         </CardHeader>
         <CardContent>
-            <CardDescription className="text-slate-600 leading-relaxed text-base">
+            <CardDescription className="text-slate-600 leading-relaxed text-base mb-4">
                 {description}
             </CardDescription>
+            {links && links.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-slate-100">
+                    {links.map((link, idx) => (
+                        <LinkBadge key={idx} {...link} />
+                    ))}
+                </div>
+            )}
         </CardContent>
     </Card>
 );
@@ -27,24 +35,26 @@ const Projects = () => {
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
             <header className="mb-12 space-y-2">
                 <h1 className="text-4xl font-bold tracking-tight text-slate-900 font-serif">Projects</h1>
-                <p className="text-slate-600 text-lg max-w-2xl">Selected works and experiments in code and science.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <ProjectCard
-                    title="Panchaangam Viz"
-                    tech={['React', 'Three.js', 'Math']}
-                    description="A 3D interactive visualization tool to demonstrate the calculation of Tithis based on celestial positions."
+                    title="Reality Sports"
+                    tech={['NeRF', 'Instant-NGP', 'Record3D']}
+                    description="Leveraging Neural Radiance Fields (NeRF) to create highly realistic 3D sports environments. Most Creative Hack Award @ Hacklytics 2023 (Data Hackathon hosted by Data Science at Georgia Tech)."
+                    links={[
+                        { label: "GitHub", url: "https://github.com/AniketPant02/RealitySports", type: "github" },
+                        { label: "Devpost", url: "https://devpost.com/software/realitysports", type: "devpost" }
+                    ]}
                 />
                 <ProjectCard
-                    title="Rustic UI Kit"
-                    tech={['Tailwind', 'CSS']}
-                    description="A design system focusing on earthy tones and paper textures for digital interfaces."
-                />
-                <ProjectCard
-                    title="Knowledge Graph"
-                    tech={['Python', 'NLP', 'GraphDB']}
-                    description="Extracting entities and relationships from ancient texts to build a queryable graph."
+                    title="ShippingGPT"
+                    tech={['ChatGPT', 'Supabase', 'deck.gl']}
+                    description="Process news articles and visualize real-time global maritime shipping risk insights."
+                    links={[
+                        // { label: "Docs", url: "#", type: "web" },
+                        // { label: "GitHub", url: "#", type: "github" }
+                    ]}
                 />
             </div>
         </div>

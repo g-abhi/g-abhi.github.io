@@ -2014,7 +2014,7 @@ export default function Panchaangam() {
                     <div className="h-full overflow-y-auto no-scrollbar scroll-smooth p-6 space-y-12 min-w-[680px] font-mono">
                         <div className="space-y-4 pb-10">
                             <div className="flex justify-between items-start">
-                                <a href="#/explorations" className="text-white/30 hover:text-white transition-colors flex items-center group" title="Back to Studio">
+                                <a href="#/studio/ancient-india" className="text-white/30 hover:text-white transition-colors flex items-center group" title="Back">
                                     <svg className="w-8 h-8 group-hover:-translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                                     </svg>
