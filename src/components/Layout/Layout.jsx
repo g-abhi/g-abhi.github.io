@@ -6,24 +6,21 @@ import SocialIcons from '../UI/SocialIcons';
 
 const Layout = () => {
     const location = useLocation();
-    const isPanchaangam = location.pathname.endsWith('panchaangam');
 
     return (
         <div className="min-h-screen flex flex-col w-full bg-[#f2f2f2] font-serif text-slate-950">
-            {!isPanchaangam && <Navbar />}
-            <main className={cn("flex-grow flex flex-col", (!isPanchaangam && location.pathname !== '/') && "pt-12")}>
+            <Navbar />
+            <main className={cn("flex-grow flex flex-col", location.pathname !== '/' && "pt-12")}>
                 <Outlet />
             </main>
-            {!isPanchaangam && (
-                <footer className="py-12 mt-auto border-t border-slate-200/50 text-slate-500/80">
-                    <div className="max-w-7xl mx-auto px-4 text-center space-y-6">
-                        <SocialIcons />
-                        <div className="text-sm font-serif">
-                            <p>© {new Date().getFullYear()} • g-abhi</p>
-                        </div>
+            <footer className="py-12 mt-auto border-t border-slate-200/50 text-slate-500/80">
+                <div className="max-w-7xl mx-auto px-4 text-center space-y-6">
+                    <SocialIcons />
+                    <div className="text-sm font-serif">
+                        <p>© {new Date().getFullYear()} • g-abhi</p>
                     </div>
-                </footer>
-            )}
+                </div>
+            </footer>
         </div>
     );
 };

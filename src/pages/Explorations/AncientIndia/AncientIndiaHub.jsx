@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const AncientIndiaHub = () => {
@@ -11,7 +10,7 @@ const AncientIndiaHub = () => {
             </div>
 
             <div className="space-y-6">
-                <Link to="panchaangam" className="block group">
+                <a href="https://g-abhi.github.io/panchaangam-viz/" target="_blank" rel="noopener noreferrer" className="block group">
                     <Card className="border border-slate-200 bg-white group-hover:shadow-md transition-all duration-300">
                         <CardHeader>
                             <div className="flex justify-between items-center">
@@ -21,11 +20,11 @@ const AncientIndiaHub = () => {
                                         Visualizing the Vedic calendar with the cosmos.
                                     </CardDescription>
                                 </div>
-                                <span className="text-2xl">→</span>
+                                <span className="text-2xl">↗</span>
                             </div>
                         </CardHeader>
                     </Card>
-                </Link>
+                </a>
 
 
             </div>
